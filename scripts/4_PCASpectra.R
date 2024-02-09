@@ -1,11 +1,11 @@
+setwd("paintrock_leaf_spectra")
 source("Functions/writeSLI_source.R")
 source("Functions/lecospectR.R")
 require(Polychrome)
-
+require(vegan)
 require(glue)
-paintrock_spectra_df<-read.csv("output/paintrock_spectra_clean.csv")
 
-head(paintrock_spectra_df)
+paintrock_spectra_df<-read.csv("output/paintrock_spectra_clean.csv")
 
 taxon_code <- c(unique(paintrock_spectra_df$taxon_code))
 tree_list = createPalette(length(unique(paintrock_spectra_df$taxon_code)),  c("#ff0000", "#00ff00", "#0000ff")) %>%
@@ -21,6 +21,11 @@ img_mat<-tree_spectra %>%
   dplyr::select(-X,-taxon_code, -Color, -ColorNum) %>% 
   as.matrix() #%>%
   #as.numeric()
+
+  #Multivariate analysis of PFT groups 
+tree_adonis<-adonis2(img_mat~as.factor(tree_spectra$taxon_code), method="euclidean", permutations=1000)
+#
+
 colnames(img_mat)
 
 #img_mat<-as.numeric(img_mat[1:nrow(img_mat),])
