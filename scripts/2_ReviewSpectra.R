@@ -2,7 +2,9 @@ source("Functions/lecospectR.R")
 paintrock_spectra<-readRDS("output/paintrock_spectra.rds")
 paintrock_spectra_df<-as.data.frame(paintrock_spectra)
 paintrock_spectra_df<-dplyr::select(paintrock_spectra_df, taxon_code, `350`:`2500`) %>% 
-  dplyr::filter(`1000`>15) #%>% dim
+  dplyr::filter(`1000`>15) %>% #dim
+  dplyr::filter(taxon_code != "QUFA") %>%
+  mutate(taxon_code = replace(taxon_code, taxon_code == "LITU0004", "LITU"))
 
 write.csv(paintrock_spectra_df, "output/paintrock_spectra_clean.csv")
 

@@ -15,6 +15,7 @@ rownames(paintrock_meta)<-NULL
 ###Set metadata
 meta(paintrock_spectra) = data.frame(paintrock_meta, stringsAsFactors = FALSE)
 #save spectral object
+
 saveRDS(paintrock_spectra,"output/paintrock_spectra.rds")
 
 
