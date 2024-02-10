@@ -21,7 +21,7 @@ paintrock_spectra_df %>%
   ungroup() %>% #colnames()
   pivot_longer(cols = `X350`:`X2500`,  names_to  = "Wavelength", values_to = "Reflectance") %>%
   mutate(Wavelength = gsub("X","",Wavelength)) %>%
-  group_by(taxon_code_wN, Wavelength) %>%  
+  group_by(taxon_code, taxon_code_wN, Wavelength) %>%  
   dplyr::summarise(Median_Reflectance = median(Reflectance),
                    Max_Reflectance = max(Reflectance),
                    Min_Reflectance = min(Reflectance),
@@ -81,6 +81,71 @@ ggplot(paintrock_spectra_df_tall, aes(Wavelength, Median_Reflectance), scales = 
   geom_ribbon(aes(Wavelength, ymin = Pct_12_5_Reflectance, ymax = Pct_87_5_Reflectance), alpha = 0.3) +
   geom_ribbon(aes(Wavelength, ymin = Lower_Reflectance, ymax = Upper_Reflectance), alpha = 0.2) +
   facet_wrap(vars(taxon_code_wN), scales = "fixed", ncol = 4)
+# facet_wrap(vars(forcats::fct_relevel(Functional_group2_wN,
+#                          levels = c("Lichen  (n= 328)",
+#                                     "Moss  (n= 86)",
+#                                     "Graminoid  (n= 128)",
+#                                     "Forb  (n= 158)",
+#                                     "Dwarf Shrub  (n= 130)",
+#                                     "Shrub  (n= 326)",
+#                                     "Tree  (n= 29)",
+#                                     "Non-vegetated surface  (n= 57)"))))
+dev.off()
+
+##Median reflectance only
+
+tree_list = createPalette(length(unique(paintrock_spectra_df$taxon_code)),  c("#ff0000", "#00ff00", "#0000ff")) %>%
+  as.data.frame() %>%
+  dplyr::rename(Color = ".") %>%
+  mutate(taxon_code = unique(paintrock_spectra_df$taxon_code)) %>%
+  mutate(ColorNum = seq(1:length(unique(paintrock_spectra_df$taxon_code))))
+
+  
+
+jpeg("output/Tree_species_median_spectral_profiles.jpg", height = 2000, width = 2500, res = 250)
+median_df<-paintrock_spectra_df_tall %>% inner_join(tree_list, by = "taxon_code", keep=FALSE)
+ggplot(median_df, aes(Wavelength, Median_Reflectance,color = Color), scales = "fixed") +
+  annotate("rect", xmin = 492.4 - (66 / 2), xmax = 492.4 + (66 / 2), ymin = 0, ymax = 100, alpha = .7, color = color[2], fill = color[2]) +
+  # Band3 559.8 36, fill =
+  annotate("rect", xmin = 559.8 - (36 / 2), xmax = 559.8 + (36 / 2), ymin = 0, ymax = 100, alpha = .7, color = color[3], fill = color[3]) +
+  # Band4 664.6 31, fill =
+  annotate("rect", xmin = 664.6 - (31 / 2), xmax = 664.6 + (31 / 2), ymin = 0, ymax = 100, alpha = .7, color = color[4], fill = color[4]) +
+  # Band5 704.1 15, fill =
+  annotate("rect", xmin = 704.1 - (15 / 2), xmax = 704.1 + (15 / 2), ymin = 0, ymax = 100, alpha = .7, color = color[5], fill = color[5]) +
+  # Band6<-740.5 15, fill =
+  annotate("rect", xmin = 740.5 - (15 / 2), xmax = 740.5 + (15 / 2), ymin = 0, ymax = 100, alpha = .7, color = color[6], fill = color[6]) +
+  # Band7<-782.8 20
+  annotate("rect", xmin = 782.8 - (20 / 2), xmax = 782.8 + (20 / 2), ymin = 0, ymax = 100, alpha = .2) +
+  # Band8<- 864 21
+  annotate("rect", xmin = 864 - (21 / 2), xmax = 864 + (21 / 2), ymin = 0, ymax = 100, alpha = .2) +
+  # Band9<-945.1 20
+  annotate("rect", xmin = 945.1 - (20 / 2), xmax = 945.1 + (20 / 2), ymin = 0, ymax = 100, alpha = .2) +
+  # Band10<-1373.5 31
+  #annotate("rect", xmin = 1373.5 - (31 / 2), xmax = 1373.5 + (31 / 2), ymin = 0, ymax = 100, alpha = .2) +
+  ## Band11<-1613.7 91
+  #annotate("rect", xmin = 1613.7 - (91 / 2), xmax = 1613.7 + (91 / 2), ymin = 0, ymax = 100, alpha = .2) +
+  ## Band12<-2202.4 175
+  #annotate("rect", xmin = 2202.4 - (175 / 2), xmax = 2202.4 + (175), ymin = 0, ymax = 100, alpha = .2) +
+  #scale_color_grey() +
+  #geom_ribbon(aes(Wavelength, ymin = Lower_Reflectance, ymax = Upper_Reflectance, alpha = 0.25))+
+  #geom_ribbon(aes(Wavelength, ymin = Pct_12_5_Reflectance, ymax = Pct_87_5_Reflectance, alpha = 0.3)) +
+      geom_line(aes(Wavelength, Median_Reflectance,color = taxon_code))+
+
+  labs(title = c("Median reflectance by plant functional group"), y = "Reflectance") +
+  theme(
+    panel.background = element_rect(fill = "white", colour = "grey50"),
+    # legend.key.size = unit(0.5, "cm"),legend.text = element_text(size=25),
+    legend.position = "right"#,
+    #title = element_text(size = 12),
+    #strip.text = element_text(size = 12),
+    #axis.text = element_text(size = 10),
+    #axis.text.x = element_text(angle = 90)
+  ) +
+  scale_color_manual(values=unique(median_df$Color), labels = unique(median_df$taxon_code), name="Tree\nSpecies")
+  #scale_color_grey() #+
+  #geom_ribbon(aes(Wavelength, ymin = Pct_12_5_Reflectance, ymax = Pct_87_5_Reflectance), alpha = 0.3) +
+  #geom_ribbon(aes(Wavelength, ymin = Lower_Reflectance, ymax = Upper_Reflectance), alpha = 0.2) +
+  #facet_wrap(vars(taxon_code_wN), scales = "fixed", ncol = 4)
 # facet_wrap(vars(forcats::fct_relevel(Functional_group2_wN,
 #                          levels = c("Lichen  (n= 328)",
 #                                     "Moss  (n= 86)",
