@@ -22,10 +22,23 @@ img_mat<-tree_spectra %>%
   as.matrix() #%>%
   #as.numeric()
 
+head(img_mat)
   #Multivariate analysis of PFT groups 
-tree_adonis<-adonis2(img_mat~as.factor(tree_spectra$taxon_code), method="euclidean", permutations=1000)
+tree_adonis<-adonis2(img_mat~as.factor(tree_spectra$taxon_code), method="euclidean", permutations=100)
 #
-
+#> tree_adonis
+#Permutation test for adonis under reduced model
+#Terms added sequentially (first to last)
+#Permutation: free
+#Number of permutations: 100
+#
+#adonis2(formula = img_mat ~ as.factor(tree_spectra$taxon_code), permutations = 100, method = "euclidean")
+#                                    Df SumOfSqs     R2      F   Pr(>F)   
+#as.factor(tree_spectra$taxon_code)  26  8886255 0.5734 13.338 0.009901 **
+#Residual                           258  6611102 0.4266                   
+#Total                              284 15497357 1.0000                   
+#---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 colnames(img_mat)
 
 #img_mat<-as.numeric(img_mat[1:nrow(img_mat),])
