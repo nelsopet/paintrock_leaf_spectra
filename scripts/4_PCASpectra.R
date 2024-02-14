@@ -8,23 +8,42 @@ require(glue)
 paintrock_spectra_df<-read.csv("output/paintrock_spectra_clean.csv")
 
 taxon_code <- c(unique(paintrock_spectra_df$taxon_code))
+
+taxon_genus<-c("Acer","Acer","Aesculus", "Carya", "Carya", "Diospyros","Fagus","Fraxinus","Gleditsia",
+"Juglans","Juniperus","Liquidambar","Liriodendron","Ostrya","Pinus", "Platanus","Prunus",
+"Quercus","Quercus","Quercus","Quercus","Quercus","Salix","Tilia","Ulmus","Ulmus","Ulmus")
+unique(taxon_genus)
+taxa_inf<-as.data.frame(cbind(taxon_code,taxon_genus))
+
+paintrock_spectra_df<-paintrock_spectra_df %>% 
+  inner_join(taxa_inf,by="taxon_code", keep=FALSE) %>% 
+  dplyr::select(taxon_code,taxon_genus, everything())
+
 tree_list = createPalette(length(unique(paintrock_spectra_df$taxon_code)),  c("#ff0000", "#00ff00", "#0000ff")) %>%
   as.data.frame() %>%
   dplyr::rename(Color = ".") %>%
   mutate(taxon_code = unique(paintrock_spectra_df$taxon_code)) %>%
   mutate(ColorNum = seq(1:length(unique(paintrock_spectra_df$taxon_code))))
 
+tree_genus_list = createPalette(length(unique(paintrock_spectra_df$taxon_genus)),  c("#ff0000", "#00ff00", "#0000ff")) %>%
+  as.data.frame() %>%
+  dplyr::rename(Color = ".") %>%
+  mutate(taxon_genus = unique(paintrock_spectra_df$taxon_genus)) %>%
+  mutate(ColorNum = seq(1:length(unique(paintrock_spectra_df$taxon_genus))))
+
 #tree_list<-cbind(taxon_code,tree_palette) %>% as.data.frame()
-tree_spectra<-inner_join(paintrock_spectra_df,tree_list, by="taxon_code", keep=FALSE)
+tree_spectra<-inner_join(paintrock_spectra_df,tree_genus_list, by="taxon_genus", keep=FALSE)
 str(tree_spectra)
 img_mat<-tree_spectra %>% 
-  dplyr::select(-X,-taxon_code, -Color, -ColorNum) %>% 
+  dplyr::select(-X,-taxon_genus, -taxon_code, -Color, -ColorNum) %>% 
   as.matrix() #%>%
   #as.numeric()
 
 head(img_mat)
   #Multivariate analysis of PFT groups 
 tree_adonis<-adonis2(img_mat~as.factor(tree_spectra$taxon_code), method="euclidean", permutations=100)
+tree_genus_adonis<-adonis2(img_mat~as.factor(tree_spectra$taxon_genus), method="euclidean", permutations=100)
+
 #
 #> tree_adonis
 #Permutation test for adonis under reduced model
@@ -37,6 +56,21 @@ tree_adonis<-adonis2(img_mat~as.factor(tree_spectra$taxon_code), method="euclide
 #as.factor(tree_spectra$taxon_code)  26  8886255 0.5734 13.338 0.009901 **
 #Residual                           258  6611102 0.4266                   
 #Total                              284 15497357 1.0000                   
+#---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+#> tree_genus_adonis
+#Permutation test for adonis under reduced model
+#Terms added sequentially (first to last)
+#Permutation: free
+#Number of permutations: 100
+#
+#adonis2(formula = img_mat ~ as.factor(tree_spectra$taxon_genus), permutations = 100, method = "euclidean")
+#                                     Df SumOfSqs      R2      F   Pr(>F)   
+#as.factor(tree_spectra$taxon_genus)  18  8268942 0.53357 16.905 0.009901 **
+#Residual                            266  7228416 0.46643                   
+#Total                               284 15497357 1.00000                   
 #---
 #Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 colnames(img_mat)
@@ -66,10 +100,10 @@ img_pca<-prcomp(img_mat, center = TRUE, scale =TRUE) #, center=FALSE, scale=FALS
 #
 
 ##PCA plot Axes 1 vs 2
-jpeg("output/PCA_trees_Axes12.jpg")
+jpeg("output/PCA_trees_genus_Axes12.jpg")
 plot(vegan::scores(img_pca)[,1:2], col=tree_spectra$Color, pch=tree_spectra$ColorNum)
 title(main="PCA of PFT Reflectance")
-legend(x = 100, y =40, legend=unique(tree_spectra$taxon_code), lty=1,  pch = unique(tree_spectra$ColorNum), col=unique(tree_spectra$Color), cex=0.5)
+legend(x = 100, y =40, legend=unique(tree_spectra$taxon_genus), lty=1,  pch = unique(tree_spectra$ColorNum), col=unique(tree_spectra$Color), cex=0.5)
 dev.off()
 
 ##PCA plot Axes 2 vs 3
