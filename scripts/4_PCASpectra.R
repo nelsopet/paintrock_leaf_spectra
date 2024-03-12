@@ -9,15 +9,17 @@ paintrock_spectra_df<-read.csv("output/paintrock_spectra_clean.csv")
 
 taxon_code <- c(unique(paintrock_spectra_df$taxon_code))
 
-taxon_genus<-c("Acer","Acer","Aesculus", "Carya", "Carya", "Diospyros","Fagus","Fraxinus","Gleditsia",
-"Juglans","Juniperus","Liquidambar","Liriodendron","Ostrya","Pinus", "Platanus","Prunus",
-"Quercus","Quercus","Quercus","Quercus","Quercus","Salix","Tilia","Ulmus","Ulmus","Ulmus")
+taxon_genus<-c("Acer","Acer","Aesculus","Carya","Carya","Diospyros","Fagus","Fraxinus","Gleditsia",
+"Juglans","Juniperus","Liquidambar","Liriodendron","Ostrya","Pinus","Platanus","Prunus","Quercus","Quercus","Quercus","Quercus","Quercus","Salix","Tilia","Ulmus","Ulmus","Ulmus")
 unique(taxon_genus)
 taxa_inf<-as.data.frame(cbind(taxon_code,taxon_genus))
 
 paintrock_spectra_df<-paintrock_spectra_df %>% 
   inner_join(taxa_inf,by="taxon_code", keep=FALSE) %>% 
   dplyr::select(taxon_code,taxon_genus, everything())
+dim(paintrock_spectra_df)
+taxa_keep=c("Acer","Fagus","Pinus","Quercus")
+paintrock_spectra_df=paintrock_spectra_df %>% dplyr::filter(taxon_genus %in% taxa_keep)
 
 tree_list = createPalette(length(unique(paintrock_spectra_df$taxon_code)),  c("#ff0000", "#00ff00", "#0000ff")) %>%
   as.data.frame() %>%
@@ -103,26 +105,34 @@ img_pca<-prcomp(img_mat, center = TRUE, scale =TRUE) #, center=FALSE, scale=FALS
 jpeg("output/PCA_trees_genus_Axes12.jpg")
 plot(vegan::scores(img_pca)[,1:2], col=tree_spectra$Color, pch=tree_spectra$ColorNum)
 title(main="PCA of PFT Reflectance")
-legend(x = 100, y =40, legend=unique(tree_spectra$taxon_genus), lty=1,  pch = unique(tree_spectra$ColorNum), col=unique(tree_spectra$Color), cex=0.5)
+legend(x = 85, y =30, legend=unique(tree_spectra$taxon_genus), lty=1,  pch = unique(tree_spectra$ColorNum),
+ col=unique(tree_spectra$Color), cex=0.8)
 dev.off()
 
 ##PCA plot Axes 2 vs 3
 jpeg("output/PCA_trees_Axes23.jpg")
 plot(vegan::scores(img_pca)[,2:3], col=tree_spectra$Color, pch=tree_spectra$ColorNum)
 title(main="PCA of PFT Reflectance")
-legend(x = 100, y =40, legend=unique(tree_spectra$taxon_code), lty=1,  pch = unique(tree_spectra$ColorNum), col=unique(tree_spectra$Color), cex=0.5)
+legend(x = -55, y =-10, legend=unique(tree_spectra$taxon_genus), lty=1,  pch = unique(tree_spectra$ColorNum), col=unique(tree_spectra$Color), cex=1)
 dev.off()
 
 ##PCA plot Axes 1 vs 3
 jpeg("output/PCA_trees_Axes13.jpg")
 plot(vegan::scores(img_pca)[,1]~vegan::scores(img_pca)[,3], col=tree_spectra$Color, pch=tree_spectra$ColorNum)
 title(main="PCA of PFT Reflectance")
-legend(x = -60, y =50, legend=unique(tree_spectra$taxon_code), lty=1,  pch = unique(tree_spectra$ColorNum), col=unique(tree_spectra$Color), cex=0.5)
+legend(x = -35, y =120, legend=unique(tree_spectra$taxon_code), lty=1,  pch = unique(tree_spectra$ColorNum), col=unique(tree_spectra$Color), cex=1)
+dev.off()
+
+##PCA plot Axes 1 vs 3 : Species within Genera
+jpeg("output/PCA_trees_Axes13_species_code.jpg")
+plot(vegan::scores(img_pca)[,1]~vegan::scores(img_pca)[,3], col=tree_spectra$Color, pch=tree_spectra$ColorNum)
+title(main="PCA of PFT Reflectance")
+legend(x = -35, y =120, legend=unique(tree_spectra$taxon_code), lty=1,  pch = unique(tree_spectra$ColorNum), col=unique(tree_spectra$Color), cex=1)
 dev.off()
 
 ##PCA plot Axes 3 vs 4
 jpeg("output/PCA_trees_Axes34.jpg")
 plot(vegan::scores(img_pca)[,3]~vegan::scores(img_pca)[,4], col=tree_spectra$Color, pch=tree_spectra$ColorNum)
 title(main="PCA of PFT Reflectance")
-legend(x = -60, y =50, legend=unique(tree_spectra$taxon_code), lty=1,  pch = unique(tree_spectra$ColorNum), col=unique(tree_spectra$Color), cex=0.5)
+legend(x = -65, y =65, legend=unique(tree_spectra$taxon_code), lty=1,  pch = unique(tree_spectra$ColorNum), col=unique(tree_spectra$Color), cex=0.5)
 dev.off()
