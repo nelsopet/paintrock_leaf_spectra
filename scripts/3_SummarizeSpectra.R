@@ -1,6 +1,7 @@
 source("Functions/writeSLI_source.R")
 source("Functions/lecospectR.R")
 require(glue)
+require(Polychrome)
 paintrock_spectra_df<-read.csv("output/paintrock_spectra_clean.csv")
 paintrock_spectra_df_tall<-
 paintrock_spectra_df %>% 
@@ -102,7 +103,7 @@ tree_list = createPalette(length(unique(paintrock_spectra_df$taxon_code)),  c("#
 
   
 
-jpeg("output/Tree_species_median_spectral_profiles.jpg", height = 2000, width = 2500, res = 250)
+jpeg("output/Tree_species_median_spectral_profiles.jpg", height = 2000, width = 3000, res = 250)
 median_df<-paintrock_spectra_df_tall %>% inner_join(tree_list, by = "taxon_code", keep=FALSE)
 ggplot(median_df, aes(Wavelength, Median_Reflectance,color = Color), scales = "fixed") +
   annotate("rect", xmin = 492.4 - (66 / 2), xmax = 492.4 + (66 / 2), ymin = 0, ymax = 100, alpha = .7, color = color[2], fill = color[2]) +
